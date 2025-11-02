@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Central - Vos Évènements Épiques</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* Particles Background */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(0, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+        }
+        
+        /* Header */
+        header {
+            position: relative;
+            z-index: 10;
+            padding: 30px 20px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%);
+            text-align: center;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        .logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.5rem;
+            color: #00ffff;
+            text-shadow: 
+                0 0 10px #00ffff,
+                0 0 20px #00ffff,
+                0 0 30px #ff00ff,
+                0 0 40px #ff00ff;
+            margin-bottom: 20px;
+            animation: glitch 3s infinite;
+        }
+        
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); text-shadow: 0 0 10px #ff00ff; }
+            40% { transform: translate(2px, -2px); text-shadow: 0 0 10px #00ff00; }
+            60% { transform: translate(-2px, -2px); text-shadow: 0 0 10px #00ffff; }
+            80% { transform: translate(2px, 2px); text-shadow: 0 0 10px #ff00ff; }
+        }
+        
+        .timezone-selector {
+            display: inline-block;
+            margin-top: 15px;
+        }
+        
+        .timezone-selector label {
+            color: #ff00ff;
+            font-size: 0.9rem;
+            margin-right: 10px;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+        
+        .timezone-selector select {
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            padding: 10px 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transition: all 0.3s;
+        }
+        
+        .timezone-selector select:hover {
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+        }
+        
+        /* Main Grid */
+        .container {
+            position: relative;
+            z-index: 5;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            min-height: calc(100vh - 200px);
+            padding: 0;
+        }
+        
+        .countdown-card {
+            position: relative;
+            padding: 40px 20px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .countdown-card:hover {
+            border-color: rgba(255, 0, 255, 0.6);
+            box-shadow: inset 0 0 50px rgba(255, 0, 255, 0.2);
+        }
+        
+        .countdown-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+        }
+        
+        .card-gta::before {
+            background-image: linear-gradient(45deg, rgba(255,0,255,0.2) 0%, rgba(0,255,255,0.2) 100%);
+            animation: cityPulse 4s infinite;
+        }
+        
+        .card-newyear::before {
+            background-image: radial-gradient(circle, rgba(255,215,0,0.3) 0%, rgba(255,0,255,0.2) 100%);
+            animation: fireworksPulse 2s infinite;
+        }
+        
+        .card-stranger::before {
+            background-image: radial-gradient(ellipse, rgba(139,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+            animation: portalPulse 5s infinite;
+        }
+        
+        @keyframes cityPulse {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.3; }
+        }
+        
+        @keyframes fireworksPulse {
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.05); opacity: 0.3; }
+        }
+        
+        @keyframes portalPulse {
+            0%, 100% { transform: rotate(0deg); opacity: 0.1; }
+            50% { transform: rotate(5deg); opacity: 0.25; }
+        }
+        
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .card-gta .card-title {
+            color: #ff00ff;
+            text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff;
+        }
+        
+        .card-newyear .card-title {
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700, 0 0 40px #ff00ff;
+        }
+        
+        .card-stranger .card-title {
+            color: #ff0000;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #8b0000;
+        }
+        
+        .countdown-display {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .time-unit {
+            text-align: center;
+            min-width: 80px;
+        }
+        
+        .time-value {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+            display: block;
+            margin-bottom: 5px;
+            font-family: 'Press Start 2P', cursive;
+            animation: digitGlow 2s infinite alternate;
+        }
+        
+        @keyframes digitGlow {
+            0% { text-shadow: 0 0 15px #00ffff; }
+            100% { text-shadow: 0 0 25px #00ffff, 0 0 35px #ff00ff; }
+        }
+        
+        .time-label {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .message {
+            font-size: 1.5rem;
+            color: #00ff00;
+            text-shadow: 0 0 20px #00ff00;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .cta-button {
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            border: none;
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px rgba(255, 0, 255, 0.8);
+        }
+        
+        /* Stranger Things Sub-Counters */
+        .sub-counters {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .sub-counter {
+            background: rgba(139, 0, 0, 0.1);
+            padding: 20px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+        
+        .sub-counter h3 {
+            font-size: 1.2rem;
+            color: #ff0000;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #ff0000;
+        }
+        
+        .sub-counter .countdown-display {
+            margin-bottom: 0;
+        }
+        
+        .sub-counter .time-value {
+            font-size: 2rem;
+        }
+        
+        /* Fireworks Effect */
+        .firework {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: explode 1s ease-out forwards;
+        }
+        
+        @keyframes explode {
+            0% { transform: translate(0, 0); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+        }
+        
+        /* Footer */
+        footer {
+            position: relative;
+            z-index: 10;
+            padding: 30px 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid rgba(0, 255, 255, 0.3);
+            margin-top: 0;
+        }
+        
+        footer a {
+            color: #00ffff;
+            text-decoration: none;
+            margin: 0 15px;
+            transition: all 0.3s;
+        }
+        
+        footer a:hover {
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .logo {
+                font-size: 1.8rem;
+            }
+            
+            .card-title {
+                font-size: 1.4rem;
+            }
+            
+            .time-value {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            .countdown-display {
+                gap: 10px;
+            }
+            
+            .time-unit {
+                min-width: 60px;
+            }
+            
+            .time-value {
+                font-size: 1.5rem;
+            }
+            
+            .cta-button {
+                padding: 10px 25px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles Background -->
+    <div id="particles"></div>
+    
+    <!-- Header -->
+    <header>
+        <h1 class="logo">Countdown Central</h1>
+        <div class="timezone-selector">
+            <label for="timezone" id="label-timezone">🌍 Fuseau Horaire :</label>
+            <select id="timezone">
+                <option value="0">UTC (Temps Universel)</option>
+                <option value="1" selected>Europe/Paris (UTC+1)</option>
+                <option value="-5">Amérique/New York (UTC-5)</option>
+                <option value="9">Asie/Tokyo (UTC+9)</option>
+                <option value="11">Australie/Sydney (UTC+11)</option>
+            </select>
+            
+            <label for="language" id="label-language" style="margin-left: 30px;">🌐 Langue :</label>
+            <select id="language">
+                <option value="fr" selected>Français</option>
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="de">Deutsch</option>
+                <option value="ja">日本語</option>
+            </select>
+        </div>
+    </header>
+    
+    <!-- Main Grid -->
+    <div class="container">
+        <!-- GTA 6 Card -->
+        <div class="countdown-card card-gta">
+            <h2 class="card-title" id="title-gta">🎮 GTA 6 : La Sortie Épique</h2>
+            <div id="gta-countdown"></div>
+        </div>
+        
+        <!-- New Year Card -->
+        <div class="countdown-card card-newyear">
+            <h2 class="card-title" id="title-newyear">🎆 Nouvel An 2026</h2>
+            <div id="newyear-countdown"></div>
+        </div>
+        
+        <!-- Stranger Things Card -->
+        <div class="countdown-card card-stranger">
+            <h2 class="card-title" id="title-stranger">📺 Stranger Things Saison 5</h2>
+            <div class="sub-counters">
+                <div class="sub-counter">
+                    <h3 id="title-vol1">Volume 1 : L'Ouverture</h3>
+                    <div id="st-vol1-countdown"></div>
+                </div>
+                <div class="sub-counter">
+                    <h3 id="title-vol2">Volume 2 : La Chute</h3>
+                    <div id="st-vol2-countdown"></div>
+                </div>
+                <div class="sub-counter">
+                    <h3 id="title-vol3">Volume 3 : La Fin</h3>
+                    <div id="st-vol3-countdown"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <a href="https://www.rockstargames.com" target="_blank">Rockstar Games</a>
+        <a href="https://www.netflix.com" target="_blank">Netflix</a>
+        <a href="#" onclick="document.getElementById('timezone').focus(); return false;">Changer de Fuseau</a>
+    </footer>
+    
+    <script>
+        // Translations
+        const translations = {
+            fr: {
+                logo: 'Countdown Central',
+                timezone: 'Fuseau Horaire',
+                language: 'Langue',
+                gta: 'GTA 6 : La Sortie Épique',
+                newyear: 'Nouvel An 2026',
+                stranger: 'Stranger Things Saison 5',
+                vol1: "Volume 1 : L'Ouverture",
+                vol2: 'Volume 2 : La Chute',
+                vol3: 'Volume 3 : La Fin',
+                days: 'Jours',
+                hours: 'Heures',
+                minutes: 'Minutes',
+                seconds: 'Secondes',
+                available: 'Disponible maintenant ! 🎉',
+                discover: 'Découvrir',
+                changeTimezone: 'Changer de Fuseau'
+            },
+            en: {
+                logo: 'Countdown Central',
+                timezone: 'Time Zone',
+                language: 'Language',
+                gta: 'GTA 6: Epic Release',
+                newyear: 'New Year 2026',
+                stranger: 'Stranger Things Season 5',
+                vol1: 'Volume 1: The Opening',
+                vol2: 'Volume 2: The Fall',
+                vol3: 'Volume 3: The End',
+                days: 'Days',
+                hours: 'Hours',
+                minutes: 'Minutes',
+                seconds: 'Seconds',
+                available: 'Available Now! 🎉',
+                discover: 'Discover',
+                changeTimezone: 'Change Timezone'
+            },
+            es: {
+                logo: 'Countdown Central',
+                timezone: 'Zona Horaria',
+                language: 'Idioma',
+                gta: 'GTA 6: Lanzamiento Épico',
+                newyear: 'Año Nuevo 2026',
+                stranger: 'Stranger Things Temporada 5',
+                vol1: 'Volumen 1: La Apertura',
+                vol2: 'Volumen 2: La Caída',
+                vol3: 'Volumen 3: El Final',
+                days: 'Días',
+                hours: 'Horas',
+                minutes: 'Minutos',
+                seconds: 'Segundos',
+                available: '¡Disponible Ahora! 🎉',
+                discover: 'Descubrir',
+                changeTimezone: 'Cambiar Zona'
+            },
+            de: {
+                logo: 'Countdown Central',
+                timezone: 'Zeitzone',
+                language: 'Sprache',
+                gta: 'GTA 6: Epischer Release',
+                newyear: 'Neujahr 2026',
+                stranger: 'Stranger Things Staffel 5',
+                vol1: 'Band 1: Die Eröffnung',
+                vol2: 'Band 2: Der Fall',
+                vol3: 'Band 3: Das Ende',
+                days: 'Tage',
+                hours: 'Stunden',
+                minutes: 'Minuten',
+                seconds: 'Sekunden',
+                available: 'Jetzt Verfügbar! 🎉',
+                discover: 'Entdecken',
+                changeTimezone: 'Zeitzone Ändern'
+            },
+            ja: {
+                logo: 'Countdown Central',
+                timezone: 'タイムゾーン',
+                language: '言語',
+                gta: 'GTA 6：壮大なリリース',
+                newyear: '新年 2026',
+                stranger: 'ストレンジャー・シングス シーズン5',
+                vol1: 'ボリューム1：開幕',
+                vol2: 'ボリューム2：転落',
+                vol3: 'ボリューム3：終焉',
+                days: '日',
+                hours: '時間',
+                minutes: '分',
+                seconds: '秒',
+                available: '今すぐ利用可能！🎉',
+                discover: '発見する',
+                changeTimezone: 'タイムゾーン変更'
+            }
+        };
+        
+        let currentLanguage = 'fr';
+        
+        function updateLanguage() {
+            const t = translations[currentLanguage];
+            document.getElementById('label-timezone').textContent = `🌍 ${t.timezone} :`;
+            document.getElementById('label-language').textContent = `🌐 ${t.language} :`;
+            document.getElementById('title-gta').textContent = `🎮 ${t.gta}`;
+            document.getElementById('title-newyear').textContent = `🎆 ${t.newyear}`;
+            document.getElementById('title-stranger').textContent = `📺 ${t.stranger}`;
+            document.getElementById('title-vol1').textContent = t.vol1;
+            document.getElementById('title-vol2').textContent = t.vol2;
+            document.getElementById('title-vol3').textContent = t.vol3;
+            
+            // Update footer
+            const footerLinks = document.querySelector('footer').children;
+            footerLinks[2].textContent = t.changeTimezone;
+            
+            // Update all countdowns to refresh labels
+            updateAllCountdowns();
+        }
+        
+        // Particle System
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                
+                // Random colors for particles
+                const colors = ['rgba(0, 255, 255, 0.6)', 'rgba(255, 0, 255, 0.6)', 'rgba(0, 255, 0, 0.6)'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.boxShadow = `0 0 10px ${colors[Math.floor(Math.random() * colors.length)]}`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        createParticles();
+        
+        // Countdown Logic
+        let currentTimezone = 1; // Default: Europe/Paris
+        
+        const events = {
+            gta6: { date: new Date('2026-05-26T00:00:00Z'), name: 'GTA 6', link: 'https://www.rockstargames.com' },
+            newyear: { date: new Date('2025-12-31T23:00:00Z'), name: 'Nouvel An 2026', link: null },
+            stVol1: { date: new Date('2025-11-25T00:00:00Z'), name: 'ST Vol. 1', link: 'https://www.netflix.com' },
+            stVol2: { date: new Date('2025-12-16T00:00:00Z'), name: 'ST Vol. 2', link: 'https://www.netflix.com' },
+            stVol3: { date: new Date('2026-01-27T00:00:00Z'), name: 'ST Vol. 3', link: 'https://www.netflix.com' }
+        };
+        
+        function adjustForTimezone(utcDate) {
+            const adjustedDate = new Date(utcDate);
+            adjustedDate.setHours(adjustedDate.getHours() + currentTimezone);
+            return adjustedDate;
+        }
+        
+        function calculateCountdown(targetDate) {
+            const now = new Date();
+            const adjusted = adjustForTimezone(targetDate);
+            const diff = adjusted - now;
+            
+            if (diff <= 0) return null;
+            
+            return {
+                days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+                seconds: Math.floor((diff % (1000 * 60)) / 1000)
+            };
+        }
+        
+        function renderCountdown(elementId, countdown, eventInfo) {
+            const element = document.getElementById(elementId);
+            const t = translations[currentLanguage];
+            
+            if (!countdown) {
+                element.innerHTML = `
+                    <div class="message">${t.available}</div>
+                    ${eventInfo.link ? `<a href="${eventInfo.link}" class="cta-button" target="_blank">${t.discover}</a>` : ''}
+                `;
+                
+                // Special effect for New Year
+                if (elementId === 'newyear-countdown') {
+                    createFireworks(element.parentElement);
+                }
+                return;
+            }
+            
+            element.innerHTML = `
+                <div class="countdown-display">
+                    <div class="time-unit">
+                        <span class="time-value">${String(countdown.days).padStart(2, '0')}</span>
+                        <span class="time-label">${t.days}</span>
+                    </div>
+                    <div class="time-unit">
+                        <span class="time-value">${String(countdown.hours).padStart(2, '0')}</span>
+                        <span class="time-label">${t.hours}</span>
+                    </div>
+                    <div class="time-unit">
+                        <span class="time-value">${String(countdown.minutes).padStart(2, '0')}</span>
+                        <span class="time-label">${t.minutes}</span>
+                    </div>
+                    <div class="time-unit">
+                        <span class="time-value">${String(countdown.seconds).padStart(2, '0')}</span>
+                        <span class="time-label">${t.seconds}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createFireworks(container) {
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.style.left = '50%';
+                    firework.style.top = '50%';
+                    firework.style.setProperty('--tx', (Math.random() - 0.5) * 400 + 'px');
+                    firework.style.setProperty('--ty', (Math.random() - 0.5) * 400 + 'px');
+                    container.appendChild(firework);
+                    
+                    setTimeout(() => firework.remove(), 1000);
+                }, i * 100);
+            }
+        }
+        
+        function updateAllCountdowns() {
+            renderCountdown('gta-countdown', calculateCountdown(events.gta6.date), events.gta6);
+            renderCountdown('newyear-countdown', calculateCountdown(events.newyear.date), events.newyear);
+            renderCountdown('st-vol1-countdown', calculateCountdown(events.stVol1.date), events.stVol1);
+            renderCountdown('st-vol2-countdown', calculateCountdown(events.stVol2.date), events.stVol2);
+            renderCountdown('st-vol3-countdown', calculateCountdown(events.stVol3.date), events.stVol3);
+        }
+        
+        // Timezone Selector
+        document.getElementById('timezone').addEventListener('change', (e) => {
+            currentTimezone = parseInt(e.target.value);
+            updateAllCountdowns();
+        });
+        
+        // Language Selector
+        document.getElementById('language').addEventListener('change', (e) => {
+            currentLanguage = e.target.value;
+            updateLanguage();
+        });
+        
+        // Update every second
+        setInterval(updateAllCountdowns, 1000);
+        updateAllCountdowns();
+        updateLanguage();
+    </script>
+</body>
+</html>
